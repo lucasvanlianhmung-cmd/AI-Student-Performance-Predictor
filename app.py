@@ -15,7 +15,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
-
+import hmac
 
 # ============================================================
 # 2. PROJECT CONFIGURATION
@@ -54,7 +54,49 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+# ============================================================
+# 4. ADMIN LOGIN SYSTEM
+# ============================================================
 
+# Initialize authentication state
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+# Display login page if user is not authenticated
+if not st.session_state["authenticated"]:
+
+    st.title("🔐 Admin Login")
+    st.write("Please log in to access the AI Student Predictor.")
+
+    with st.form("admin_login_form"):
+
+        username = st.text_input("Username")
+
+        password = st.text_input(
+            "Password",
+            type="password"
+        )
+
+        login_button = st.form_submit_button("Login")
+
+    if login_button:
+
+        correct_username = st.secrets["ADMIN_USERNAME"]
+        correct_password = st.secrets["ADMIN_PASSWORD"]
+
+        if (
+            hmac.compare_digest(username, correct_username)
+            and hmac.compare_digest(password, correct_password)
+        ):
+
+            st.session_state["authenticated"] = True
+            st.success("Login successful!")
+            st.rerun()
+
+        else:
+            st.error("Incorrect username or password.")
+
+    st.stop()
 
 # ============================================================
 # 4. LOAD TRAINED MACHINE LEARNING MODELS
